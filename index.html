@@ -31,7 +31,14 @@
             md-menu-class="autocomplete-custom-template"
             placeholder="Search for a Movie or Actor">
             <md-item-template>
-              <span class="item-title" md-highlight-text="searchText" md-highlight-flags="^i">{{item.title}}</span>
+              <span md-highlight-text="searchText" md-highlight-flags="^i">
+                  {{item.title}}
+              </span>
+               <span class="item-metadata">
+                 <span class="item-metastat">
+                   <strong class="category">&nbsp;in {{item.type}}</strong>
+                 </span>
+               </span>
             </md-item-template>
             <md-not-found>
               No matches found.

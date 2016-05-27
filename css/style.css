@@ -25,8 +25,13 @@
   padding-top: -1px;
   padding-bottom: 0;
   white-space: normal;
+  color: green;
 }
 
+.category {
+  font: bold italic;
+  color: red;
+}
 
 .grid {
     /*border-radius: 15px;*/
