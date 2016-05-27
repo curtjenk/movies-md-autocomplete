@@ -20,11 +20,18 @@ movieApp.controller('movieController', function ($scope, $q, $http, $log, api) {
 
 	// $scope.imagesArr = [];
 	$scope.imageURL = 'http://image.tmdb.org/t/p/w300';
-	api.nowPlaying().then(function (res) {
-    //console.log(res);
-		$scope.dataResults = res.data;
-		// initializeIsotope();
-	});
+	now_playing();
+
+	$scope.reset = now_playing;
+
+	function now_playing() {
+		$scope.details = false;
+		api.nowPlaying().then(function (res) {
+			//console.log(res);
+			$scope.dataResults = res.data;
+			// initializeIsotope();
+		});
+	}
 
 	$scope.querySearch = querySearch;
 	$scope.selectedItemChange = selectedItemChange;
@@ -37,9 +44,6 @@ movieApp.controller('movieController', function ($scope, $q, $http, $log, api) {
 		var p2 = api.personSearch(term);
 		$q.all([p1, p2]).then(function (values) {
 			var list = [];
-      // console.log(term);
-			// console.log(values[0].data);
-			// console.log(values[1].data);
 
 			//the api is bringing back stuff that doesn't even partially match.  Filter out this stuff
 			for (var x = 0; x < values[0].data.length; x++) {
@@ -58,7 +62,7 @@ movieApp.controller('movieController', function ($scope, $q, $http, $log, api) {
 				return 0;
 			});
 
-			console.log(list);
+			//console.log(list);
 			deferred.resolve(list);
 		});
 
@@ -71,9 +75,36 @@ movieApp.controller('movieController', function ($scope, $q, $http, $log, api) {
 
 	function selectedItemChange(item) {
 		$log.info('Selected Item changed to ' + JSON.stringify(item));
-    //check type.  if "movie" query movie by id.  If person, query person by id
-		//display in the
-		$scope.dataResults = res.data;
+		//check type.  if "movie" query movie by id and show the movie poster.  If person, query person by id
+		//and show the movie(s) for that person.
+		if (!item || !item.type) {
+			return;
+		}
+
+		api.getById(item.id, item.type).then(function (data) {
+			console.log(data);
+			$scope.details = true;
+			$scope.detailPosters = [];
+			if (item.type == 'Person') {
+				$scope.detailPosters.push({
+					'poster': data.info.profile_path,
+					'id': data.info.id
+				});
+				if (data.info.movie_credits && data.info.movie_credits.cast) {
+					for (var i = 0; i < data.info.movie_credits.cast.length; i++) {
+						$scope.detailPosters.push({
+							'poster': data.info.movie_credits.cast[i].poster_path,
+							'id': data.info.movie_credits.cast[i].id
+						});
+					}
+				}
+			} else {
+				$scope.detailPosters.push({
+					'poster': data.info.poster_path,
+					'id': data.info.id
+				});
+			}
+		});
 	}
 
 	// $scope.dataResults = [];
@@ -103,10 +134,84 @@ movieApp.factory('api', function ($http, $q) {
 	var methodSearchMovie = 'search/movie?query=';
 	var methodSearchPerson = 'search/person?search_type=ngram&query=';
 	var methodSearchMulti = 'search/multi?include_adult=false&search_type=ngram&query=';
+	var methodGetMovieById = baseURL + "movie/";
+	var methodGetPersonById = baseURL + "person/";
 
 	var URL_NOW_PLAYING = encodeURI(baseURL + methodNowPlaying + '?' + apiKey);
 
 	var curPageNo = 1;
+
+	api.getById = function (id, type) {
+		var method = '';
+		if (type.toLowerCase() == 'movie') {
+			method = methodGetMovieById;
+			option = "";
+		} else {
+			method = methodGetPersonById;
+			option = "&append_to_response=movie_credits";
+		}
+		var infoUrl = encodeURI(method + id + "?" + apiKey + option);
+		var reviewUrl = encodeURI(method + id + "/reviews?" + apiKey);
+		var creditsUrl = encodeURI(method + id + "/credits?" + apiKey);
+
+		var deferred = $q.defer();
+
+		var info = $http.get(infoUrl).then(
+			function (res) {
+				console.log(res);
+				var rtn = {};
+				rtn.status = "success";
+				rtn.data = [];
+				rtn.data = res.data;
+				return rtn;
+			},
+			function (err) {
+				var rtn = {};
+				rtn.status = 'fail';
+				rtn.data = [];
+				return rtn;
+			}
+		);
+		var review = $http.get(reviewUrl).then(
+			function (res) {
+				var rtn = {};
+				rtn.status = "success";
+				rtn.data = [];
+				rtn.data = res.data;
+				return rtn;
+			},
+			function (err) {
+				var rtn = {};
+				rtn.status = 'fail';
+				rtn.data = [];
+				return rtn;
+			}
+		);
+		var credits = $http.get(creditsUrl).then(
+			function (res) {
+				var rtn = {};
+				rtn.status = "success";
+				rtn.data = [];
+				rtn.data = res.data;
+				return rtn;
+			},
+			function (err) {
+				var rtn = {};
+				rtn.status = 'fail';
+				rtn.data = [];
+				return rtn;
+			}
+		);
+		$q.all([info, review, credits]).then(function (values) {
+			var results = [];
+			results.info = values[0].data;
+			results.review = values[1].data;
+			results.credits = values[2].data;
+			deferred.resolve(results);
+		});
+
+		return deferred.promise;
+	};
 
 	api.personSearch = function (term) {
 		var rtn = {};

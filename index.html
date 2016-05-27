@@ -17,6 +17,9 @@
     <div class="container">
       <div class="row top-row" layout="column">
         <div class="col-sm-12 text-center">
+          <div>
+            <button ng-click="reset()">Home</button>
+          </div>
           <md-content  class="md-padding">
           <md-autocomplete
             ng-disabled="isDisabled"
@@ -48,9 +51,14 @@
         </div>
       </div>
       <div class="row">
-        <div class="grid col-sm-12">
+        <div ng-show="!details" class="grid col-sm-12">
           <div class="grid-item col-sm-2" ng-repeat="movie in dataResults">
             <img check-image ng-src="{{imageURL}}{{movie.poster_path}}">
+          </div>
+        </div>
+        <div ng-show="details" class="grid col-sm-12">
+          <div class="grid-item col-sm-2" ng-repeat="dp in detailPosters">
+              <img check-image ng-src="{{imageURL}}{{dp.poster}}">
           </div>
         </div>
       </div>
