@@ -1,46 +1,63 @@
 var movieApp = angular.module('movieApp', ['ngMaterial']);
-movieApp.controller('movieController', function ($scope, $q, $http, api) {
+//add  "check-image" (without quotes) attribute to the img element
+movieApp.directive('checkImage', function ($http) {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			attrs.$observe('ngSrc', function (ngSrc) {
+				$http.get(ngSrc).success(function () {
+					// alert('image exists');
+				}).error(function () {
+					// alert('image does not exist');
+					element.attr('src', 'img/placeholder.png'); // set default image
+				});
+			});
+		}
+	};
+});
+
+movieApp.controller('movieController', function ($scope, $q, $http, $log, api) {
 
 	// $scope.imagesArr = [];
 	$scope.imageURL = 'http://image.tmdb.org/t/p/w300';
 	api.nowPlaying().then(function (res) {
-		console.log(res);
+    //console.log(res);
 		$scope.dataResults = res.data;
-		initializeIsotope();
+		// initializeIsotope();
 	});
 
 	$scope.querySearch = querySearch;
+	$scope.selectedItemChange = selectedItemChange;
+	//$scope.searchTextChange = searchTextChange;
 
 	function querySearch(term) {
 		// console.log("called querySearch");
 		var deferred = $q.defer();
-		// var p1 = api.movieSearch(term).then(function (res) {
-		// 	if (res.status == 'success') {
-		// 		// console.log(res.data);
-		// 		deferred.resolve(res.data);
-		// 	} else {
-		// 		deferred.resolve([]);
-		// 	}
-		// });
-		// var p2 = api.personSearch(term).then(function (res) {
-		// 	if (res.status == 'success') {
-		// 		// console.log(res.data);
-		// 		deferred.resolve(res.data);
-		// 	} else {
-		// 		deferred.resolve([]);
-		// 	}
-		// });
 		var p1 = api.movieSearch(term);
 		var p2 = api.personSearch(term);
-		$q.all([p1, p2]).then(function(values) {
+		$q.all([p1, p2]).then(function (values) {
 			var list = [];
+      // console.log(term);
+			// console.log(values[0].data);
+			// console.log(values[1].data);
 
-   		for (var x=0; x<values[0].data.length; x++) {
-				list.push(values[0].data[x]);
+			//the api is bringing back stuff that doesn't even partially match.  Filter out this stuff
+			for (var x = 0; x < values[0].data.length; x++) {
+				if (values[0].data[x].title.toLowerCase().indexOf(term.toLowerCase()) > -1) {
+					list.push(values[0].data[x]);
+				}
 			}
-			for (var y=0; y<values[1].data.length; y++) {
-				list.push(values[1].data[y]);
+			for (var y = 0; y < values[1].data.length; y++) {
+				if (values[1].data[y].title.toLowerCase().indexOf(term.toLowerCase()) > -1) {
+					list.push(values[1].data[y]);
+				}
 			}
+			list.sort(function (a, b) {
+				if (a.title < b.title) return -1; //sort ascending
+				if (a.title > b.title) return 1;
+				return 0;
+			});
+
 			console.log(list);
 			deferred.resolve(list);
 		});
@@ -48,22 +65,35 @@ movieApp.controller('movieController', function ($scope, $q, $http, api) {
 		return deferred.promise;
 	}
 
-	// $scope.dataResults = [];
-
-	function initializeIsotope() {
-
-		var theGrid = $('.grid').isotope({
-			// options
-			itemSelector: '.grid-item',
-			layoutMode: 'masonry'
-		});
-
-		// theGrid.imagesLoaded().progress(function() {
-		//     theGrid.isotope('layout');
-		// });
+	function searchTextChange(text) {
+		$log.info('Text changed to ' + text);
 	}
 
+	function selectedItemChange(item) {
+		$log.info('Selected Item changed to ' + JSON.stringify(item));
+    //check type.  if "movie" query movie by id.  If person, query person by id
+		//display in the
+		$scope.dataResults = res.data;
+	}
+
+	// $scope.dataResults = [];
+
+	// function initializeIsotope() {
+	//
+	// 	var theGrid = $('.grid').isotope({
+	// 		// options
+	// 		itemSelector: '.grid-item',
+	// 		layoutMode: 'masonry'
+	// 	});
+	//
+	// 	theGrid.imagesLoaded().progress(function () {
+	// 		theGrid.isotope('layout');
+	// 	});
+	// }
+
 });
+
+
 
 movieApp.factory('api', function ($http, $q) {
 	var api = {};
@@ -78,8 +108,8 @@ movieApp.factory('api', function ($http, $q) {
 
 	var curPageNo = 1;
 
-  api.personSearch = function(term) {
-			var rtn = {};
+	api.personSearch = function (term) {
+		var rtn = {};
 		var promise = $http.get(encodeURI(baseURL + methodSearchPerson + term + '&' + apiKey)).then(
 			function (res) {
 				rtn.status = 'success';
@@ -91,14 +121,14 @@ movieApp.factory('api', function ($http, $q) {
 						'type': 'Person'
 					});
 				}
-	      return rtn;
+				return rtn;
 			},
 			function (error) {
 				rtn.status = 'fail';
 				rtn.data = [];
 				return rtn;
 			});
-			return promise;
+		return promise;
 	};
 
 	api.movieSearch = function (term) {
@@ -126,7 +156,7 @@ movieApp.factory('api', function ($http, $q) {
 				return rtn;
 			});
 
-			return promise;
+		return promise;
 	};
 
 	api.nowPlaying = function (next) {

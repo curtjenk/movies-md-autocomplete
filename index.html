@@ -36,7 +36,7 @@
               </span>
                <span class="item-metadata">
                  <span class="item-metastat">
-                   <strong class="category">&nbsp;in {{item.type}}</strong>
+                   <strong class="category">&nbsp;:&nbsp;{{item.type}}&nbsp;{{item.id}}</strong>
                  </span>
                </span>
             </md-item-template>
@@ -50,7 +50,7 @@
       <div class="row">
         <div class="grid col-sm-12">
           <div class="grid-item col-sm-2" ng-repeat="movie in dataResults">
-            <img ng-src="{{imageURL}}{{movie.poster_path}}">
+            <img check-image ng-src="{{imageURL}}{{movie.poster_path}}">
           </div>
         </div>
       </div>
