@@ -1,0 +1,73 @@
+/* line 3, ../compass/sass/style.scss */
+
+
+/*.top-row {
+  background-color: #28D0FF;
+  width: 100%;
+  text-align: center;
+}*/
+
+.top-row {
+    background-color: #28D0FF;
+    width: 100%;
+    text-align: center;
+    border-radius: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.fa .fa-search {
+    background-color: white;
+}
+
+.autocomplete-custom-template li {
+  border-bottom: 1px solid #ccc;
+  height: auto;
+  padding-top: -1px;
+  padding-bottom: 0;
+  white-space: normal;
+}
+
+
+.grid {
+    /*border-radius: 15px;*/
+    margin: auto;
+}
+.grid img {
+    width: auto;
+    height: 221px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+/* line 9, ../compass/sass/style.scss */
+
+
+/*#poster-grid {
+  border-radius: 5px;
+}*/
+
+
+/* line 12, ../compass/sass/style.scss */
+
+
+/*#poster-grid img {
+  width: auto;
+  height: 221px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}*/
+
+
+/* line 20, ../compass/sass/style.scss */
+
+
+/*.indent {
+  padding: 0 20px;
+}*/
+
+
+/* line 24, ../compass/sass/style.scss */
+
+
+/*.now-playing {
+  width: 16%;
+}*/

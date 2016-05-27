@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html ng-app="movieApp">
+
+  <head>
+    <title>Movies</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" type="text/css" href="node_modules/angular-material/angular-material.min.css"/>
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="node_modules/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+  </head>
+
+  <body ng-controller="movieController" ng-cloak>
+    <div class="container">
+      <div class="row top-row" layout="column">
+        <div class="col-sm-12 text-center">
+          <md-content  class="md-padding">
+          <md-autocomplete
+            ng-disabled="isDisabled"
+            md-no-cache="noCache"
+            md-search-text-change="searchTextChange(searchText)"
+            md-search-text="searchText"
+            md-selected-item-change="selectedItemChange(item)"
+            md-selected-item="selectedItem"
+            md-items="item in querySearch(searchText)"
+            md-item-text="item.title"
+            md-min-length="3"
+            md-menu-class="autocomplete-custom-template"
+            placeholder="Search for a Movie or Actor">
+            <md-item-template>
+              <span class="item-title" md-highlight-text="searchText" md-highlight-flags="^i">{{item.title}}</span>
+            </md-item-template>
+            <md-not-found>
+              No matches found.
+            </md-not-found>
+          </md-autocomplete>
+          </md-content>
+        </div>
+      </div>
+      <div class="row">
+        <div class="grid col-sm-12">
+          <div class="grid-item col-sm-2" ng-repeat="movie in dataResults">
+            <img ng-src="{{imageURL}}{{movie.poster_path}}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+
+
+
+    <script type="text/javascript" src="js/controller.js"></script>
+    <!-- <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+    <script type="text/javascript" src="js/isotope.pkgd.min.js"></script>
+
+  </body>
+
+</html>
